@@ -34,14 +34,21 @@ import (
 	if there's nothing here we can assume that we are working in the current directory
 	-- help list commands
 */
+
+type Config struct {
+	VideoUserConfig    int
+	SubtitleUserConfig int
+	directory          string
+}
+
 func main() {
 	fmt.Println("Started")
 	dir := GetDirectory()
-	TakeUserInputForVideo()
-	TakeUserInputForSubtitle()
+
+	UserConfig := Config{TakeUserInputForVideo(), TakeUserInputForSubtitle(), dir}
 
 	FileMap := listFiles(dir) // Print all the files in the current directory
-	DebugFileMapOutput(FileMap)
+	DebugFileMapOutput(FileMap, &UserConfig)
 
 	//Maybe TO-DO sort the file map values. But I think the OS does that already so its not a big issue
 
@@ -81,7 +88,10 @@ func TakeUserInputForSubtitle() int {
 	return SubtitleUserInput
 }
 
-func DebugFileMapOutput(FileMap map[string][]string) {
+func DebugFileMapOutput(FileMap map[string][]string, UserConfig *Config) {
+
+	fmt.Printf("User Config:\n%d user video input\n%d user subtitle input\n%s User directory\n",
+		UserConfig.VideoUserConfig, UserConfig.SubtitleUserConfig, UserConfig.directory)
 
 	println("Entered Debug Output for FileMap")
 	keys := make([]string, 0, len(FileMap))
