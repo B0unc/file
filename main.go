@@ -84,33 +84,33 @@ func main() {
 	//Maybe TO-DO sort the file map values. But I think the OS does that already so its not a big issue
 
 	// TO-DO: create a while loop that waits until the user enters a key so they can exit
-	fmt.Println("\nPress Enter to exit...")
-	bufio.NewReader(os.Stdin).ReadBytes('\n')
+	HandleUserExitPhase(0)
 }
 
 func HandleArguments(UserConfig *Config) {
 	if len(os.Args) < 2 {
 		println("No Arguments entered. Try -help to see commands")
-		os.Exit(-1)
+		HandleUserExitPhase(-1)
 	}
 
 	// Switch case for args 1
 	switch os.Args[1] {
 	case "-help":
 		fmt.Println("help commands should be here")
+		HandleUserExitPhase(-1)
 	case "-f":
 		fmt.Println("should excute the folder directory function")
 		HandleArgumentsFolderCommand(UserConfig)
 	default:
 		fmt.Println("Argument not found. Try the -help command for more info")
-		os.Exit(-1)
+		HandleUserExitPhase(-1)
 	}
 }
 
 func HandleArgumentsFolderCommand(UserConfig *Config) {
 	if len(os.Args) > 3 {
 		fmt.Println("Try putting the folder name in '' if the folder has any spaces.")
-		os.Exit(-1)
+		HandleUserExitPhase(-1)
 	} else if len(os.Args) == 2 {
 		fmt.Println("Successfully execute the folder command\nNo folder name was enter. Trying the current directory. If you dont want this try -f 'folder name here'.")
 		UserConfig.directory = GetDirectory("")
@@ -119,7 +119,7 @@ func HandleArgumentsFolderCommand(UserConfig *Config) {
 		UserConfig.directory = GetDirectory(os.Args[2])
 	} else {
 		fmt.Println("Something went wrong check the function HandleArgumentsFolderCommand")
-		os.Exit(-1)
+		HandleUserExitPhase(-1)
 	}
 
 }
@@ -193,4 +193,12 @@ func GetUserFiles(UserConfig *Config) map[string][]string {
 	}
 
 	return FileMap
+}
+
+func HandleUserExitPhase(OSExitCode int) {
+	// TO-DO: create a while loop that waits until the user enters a key so they can exit
+	fmt.Println("\nPress Enter to exit...")
+	bufio.NewReader(os.Stdin).ReadBytes('\n')
+
+	os.Exit(OSExitCode)
 }
