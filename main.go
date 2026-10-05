@@ -54,15 +54,31 @@ var SubtitleExtensions = map[int]string{
 	2: ".ass",
 }
 
+/*
+	Arguement len:
+		if there is nothing added the len is 1
+		if there is somethere the len is > 1
+	Console arguments needed: expect a len 2
+		help
+			-help
+		Directory: should expect a len 3
+			-f current
+			-f "Some folder to go to"
+	We need to [0:2]
+*/
+
 func main() {
+	println(len(os.Args))
+	UserConfig := Config{}
+	HandleArguments(&UserConfig)
 	fmt.Println("Started")
-	dir := GetDirectory()
 
-	vid_ext := TakeUserInputForVideo()
-	sub_ext := TakeUserInputForSubtitle()
-	UserConfig := Config{vid_ext, VideoExtensions[vid_ext], sub_ext, SubtitleExtensions[sub_ext], dir}
+	UserConfig.VideoUserConfig = TakeUserInputForVideo()
+	UserConfig.VideoUserConfigName = VideoExtensions[UserConfig.VideoUserConfig]
+	UserConfig.SubtitleUserConfig = TakeUserInputForSubtitle()
+	UserConfig.SubtitleUserConfigName = SubtitleExtensions[UserConfig.SubtitleUserConfig]
 
-	FileMap := listFiles(dir, &UserConfig) // Print all the files in the current directory
+	FileMap := GetUserFiles(&UserConfig) // Print all the files in the current directory
 	DebugFileMapOutput(FileMap, &UserConfig)
 
 	//Maybe TO-DO sort the file map values. But I think the OS does that already so its not a big issue
@@ -72,15 +88,53 @@ func main() {
 	bufio.NewReader(os.Stdin).ReadBytes('\n')
 }
 
+func HandleArguments(UserConfig *Config) {
+	if len(os.Args) < 2 {
+		println("No Arguments entered. Try -help to see commands")
+		os.Exit(-1)
+	}
+
+	// Switch case for args 1
+	switch os.Args[1] {
+	case "-help":
+		fmt.Println("help commands should be here")
+	case "-f":
+		fmt.Println("should excute the folder directory function")
+		HandleArgumentsFolderCommand(UserConfig)
+	default:
+		fmt.Println("Argument not found. Try the -help command for more info")
+		os.Exit(-1)
+	}
+}
+
+func HandleArgumentsFolderCommand(UserConfig *Config) {
+	if len(os.Args) > 3 {
+		fmt.Println("Try putting the folder name in '' if the folder has any spaces.")
+		os.Exit(-1)
+	} else if len(os.Args) == 2 {
+		fmt.Println("Successfully execute the folder command\nNo folder name was enter. Trying the current directory. If you dont want this try -f 'folder name here'.")
+		UserConfig.directory = GetDirectory("")
+	} else if len(os.Args) == 3 {
+		fmt.Printf("Successfully execute the folder command\nTrying Folder '%s'\n", os.Args[2])
+		UserConfig.directory = GetDirectory(os.Args[2])
+	} else {
+		fmt.Println("Something went wrong check the function HandleArgumentsFolderCommand")
+		os.Exit(-1)
+	}
+
+}
+
 // Get the user specificed directory Current working directory of the program and the folder
-func GetDirectory() string {
+func GetDirectory(ArgumentFolderCommandName string) string {
 	UserSpecifiedDirectory, err := os.Getwd()
 
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	FullUserDirectory := filepath.Join(UserSpecifiedDirectory, "video_test")
+	FullUserDirectory := filepath.Join(UserSpecifiedDirectory, ArgumentFolderCommandName)
+
+	// add a check to see if the folder exist
 
 	return FullUserDirectory
 }
@@ -122,9 +176,9 @@ func DebugFileMapOutput(FileMap map[string][]string, UserConfig *Config) {
 	}
 }
 
-func listFiles(dir string, UserConfig *Config) map[string][]string {
+func GetUserFiles(UserConfig *Config) map[string][]string {
 
-	entries, err := os.ReadDir(dir)
+	entries, err := os.ReadDir(UserConfig.directory)
 
 	if err != nil {
 		log.Fatal(err)
