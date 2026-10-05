@@ -135,6 +135,15 @@ func GetDirectory(ArgumentFolderCommandName string) string {
 	}
 
 	FullUserDirectory := filepath.Join(UserSpecifiedDirectory, ArgumentFolderCommandName)
+	info, err := os.Stat(FullUserDirectory)
+
+	if err != nil {
+		log.Fatal("Folder ", FullUserDirectory, " cannot be found or is not a directory")
+	}
+
+	if !info.IsDir() {
+		log.Fatal(FullUserDirectory, " is not a directory")
+	}
 
 	// add a check to see if the folder exist
 
@@ -183,7 +192,7 @@ func GetUserFiles(UserConfig *Config) map[string][]string {
 	entries, err := os.ReadDir(UserConfig.directory)
 
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal(err, " something went wrong in the getuserfiles function")
 	}
 
 	FileMap := make(map[string][]string)
