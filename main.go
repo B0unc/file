@@ -62,7 +62,7 @@ func main() {
 	sub_ext := TakeUserInputForSubtitle()
 	UserConfig := Config{vid_ext, VideoExtensions[vid_ext], sub_ext, SubtitleExtensions[sub_ext], dir}
 
-	FileMap := listFiles(dir) // Print all the files in the current directory
+	FileMap := listFiles(dir, &UserConfig) // Print all the files in the current directory
 	DebugFileMapOutput(FileMap, &UserConfig)
 
 	//Maybe TO-DO sort the file map values. But I think the OS does that already so its not a big issue
@@ -122,7 +122,7 @@ func DebugFileMapOutput(FileMap map[string][]string, UserConfig *Config) {
 	}
 }
 
-func listFiles(dir string) map[string][]string {
+func listFiles(dir string, UserConfig *Config) map[string][]string {
 
 	entries, err := os.ReadDir(dir)
 
@@ -130,12 +130,12 @@ func listFiles(dir string) map[string][]string {
 		log.Fatal(err)
 	}
 
-	var files []string
 	FileMap := make(map[string][]string)
 	for _, v := range entries {
-		files = append(files, v.Name())
 		extension := filepath.Ext(v.Name())
-		FileMap[extension] = append(FileMap[extension], v.Name())
+		if extension == UserConfig.VideoUserConfigName || extension == UserConfig.SubtitleUserConfigName {
+			FileMap[extension] = append(FileMap[extension], v.Name())
+		}
 	}
 
 	return FileMap
