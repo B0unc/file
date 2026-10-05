@@ -68,7 +68,6 @@ var SubtitleExtensions = map[int]string{
 */
 
 func main() {
-	println(len(os.Args))
 	UserConfig := Config{}
 	HandleArguments(&UserConfig)
 	fmt.Println("Started")
@@ -96,10 +95,9 @@ func HandleArguments(UserConfig *Config) {
 	// Switch case for args 1
 	switch os.Args[1] {
 	case "-help":
-		fmt.Println("help commands should be here")
+		HandleArgumentHelp()
 		HandleUserExitPhase(-1)
 	case "-f":
-		fmt.Println("should excute the folder directory function")
 		HandleArgumentsFolderCommand(UserConfig)
 	default:
 		fmt.Println("Argument not found. Try the -help command for more info")
@@ -112,16 +110,20 @@ func HandleArgumentsFolderCommand(UserConfig *Config) {
 		fmt.Println("Try putting the folder name in '' if the folder has any spaces.")
 		HandleUserExitPhase(-1)
 	} else if len(os.Args) == 2 {
-		fmt.Println("Successfully execute the folder command\nNo folder name was enter. Trying the current directory. If you dont want this try -f 'folder name here'.")
+		fmt.Println("No folder name was enter. Trying the current directory. If you dont want this try -f 'folder name here'.")
 		UserConfig.directory = GetDirectory("")
 	} else if len(os.Args) == 3 {
-		fmt.Printf("Successfully execute the folder command\nTrying Folder '%s'\n", os.Args[2])
+		fmt.Printf("Trying Folder '%s'\n", os.Args[2])
 		UserConfig.directory = GetDirectory(os.Args[2])
 	} else {
 		fmt.Println("Something went wrong check the function HandleArgumentsFolderCommand")
 		HandleUserExitPhase(-1)
 	}
 
+}
+
+func HandleArgumentHelp() {
+	fmt.Println("-help Shows commands to use for the program\n-f use for the destination of the fold\n-f 'folder name' enter the folder name to grab the files from that folder.")
 }
 
 // Get the user specificed directory Current working directory of the program and the folder
