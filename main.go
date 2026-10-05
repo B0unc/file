@@ -41,6 +41,8 @@ type Config struct {
 	SubtitleUserConfig     int
 	SubtitleUserConfigName string
 	directory              string
+	RenameFileName         string
+	TotalNumberOfEpisodes  int
 }
 
 // Map for the Extensions
@@ -76,6 +78,8 @@ func main() {
 	UserConfig.VideoUserConfigName = VideoExtensions[UserConfig.VideoUserConfig]
 	UserConfig.SubtitleUserConfig = TakeUserInputForSubtitle()
 	UserConfig.SubtitleUserConfigName = SubtitleExtensions[UserConfig.SubtitleUserConfig]
+	UserConfig.RenameFileName = GetUserFileRename()
+	UserConfig.TotalNumberOfEpisodes = GetUserNumberOfEpisodes()
 
 	FileMap := GetUserFiles(&UserConfig) // Print all the files in the current directory
 	DebugFileMapOutput(FileMap, &UserConfig)
@@ -170,10 +174,12 @@ func TakeUserInputForSubtitle() int {
 
 func DebugFileMapOutput(FileMap map[string][]string, UserConfig *Config) {
 
-	fmt.Printf("User Config:\n%d user video input '%s' extension name\n%d user subtitle input '%s' extension name\n%s User directory\n",
+	fmt.Printf("User Config:\n%d user video input '%s' extension name\n%d user subtitle input '%s' extension name\n%s User directory\n'%s' show's name\n%d number of episodes\n",
 		UserConfig.VideoUserConfig, UserConfig.VideoUserConfigName,
 		UserConfig.SubtitleUserConfig, UserConfig.SubtitleUserConfigName,
-		UserConfig.directory)
+		UserConfig.directory,
+		UserConfig.RenameFileName,
+		UserConfig.TotalNumberOfEpisodes)
 
 	println("Entered Debug Output for FileMap")
 	keys := make([]string, 0, len(FileMap))
@@ -204,6 +210,27 @@ func GetUserFiles(UserConfig *Config) map[string][]string {
 	}
 
 	return FileMap
+}
+
+func GetUserFileRename() string {
+	UserFileRenameInput := ""
+
+	fmt.Println("\nEnter a the name of the show: ")
+	fmt.Scanln(&UserFileRenameInput)
+
+	return UserFileRenameInput
+}
+
+func GetUserNumberOfEpisodes() int {
+	NumberofEpisodesInput := 0
+	fmt.Println("\nEnter the number of episodes: ")
+	fmt.Scanln(&NumberofEpisodesInput)
+
+	return NumberofEpisodesInput
+}
+func HanldeFileRenaming(UserConfig *Config) {
+	// TODO handle the ranaming
+	return
 }
 
 func HandleUserExitPhase(OSExitCode int) {
