@@ -36,16 +36,31 @@ import (
 */
 
 type Config struct {
-	VideoUserConfig    int
-	SubtitleUserConfig int
-	directory          string
+	VideoUserConfig        int
+	VideoUserConfigName    string
+	SubtitleUserConfig     int
+	SubtitleUserConfigName string
+	directory              string
+}
+
+// Map for the Extensions
+var VideoExtensions = map[int]string{
+	1: ".mkv",
+	2: ".mp4",
+}
+
+var SubtitleExtensions = map[int]string{
+	1: ".srt",
+	2: ".ass",
 }
 
 func main() {
 	fmt.Println("Started")
 	dir := GetDirectory()
 
-	UserConfig := Config{TakeUserInputForVideo(), TakeUserInputForSubtitle(), dir}
+	vid_ext := TakeUserInputForVideo()
+	sub_ext := TakeUserInputForSubtitle()
+	UserConfig := Config{vid_ext, VideoExtensions[vid_ext], sub_ext, SubtitleExtensions[sub_ext], dir}
 
 	FileMap := listFiles(dir) // Print all the files in the current directory
 	DebugFileMapOutput(FileMap, &UserConfig)
@@ -90,8 +105,10 @@ func TakeUserInputForSubtitle() int {
 
 func DebugFileMapOutput(FileMap map[string][]string, UserConfig *Config) {
 
-	fmt.Printf("User Config:\n%d user video input\n%d user subtitle input\n%s User directory\n",
-		UserConfig.VideoUserConfig, UserConfig.SubtitleUserConfig, UserConfig.directory)
+	fmt.Printf("User Config:\n%d user video input '%s' extension name\n%d user subtitle input '%s' extension name\n%s User directory\n",
+		UserConfig.VideoUserConfig, UserConfig.VideoUserConfigName,
+		UserConfig.SubtitleUserConfig, UserConfig.SubtitleUserConfigName,
+		UserConfig.directory)
 
 	println("Entered Debug Output for FileMap")
 	keys := make([]string, 0, len(FileMap))
