@@ -85,6 +85,7 @@ func main() {
 	DebugFileMapOutput(FileMap, &UserConfig)
 
 	//Maybe TO-DO sort the file map values. But I think the OS does that already so its not a big issue
+	HanldeFileRenaming(&UserConfig, FileMap)
 
 	// TO-DO: create a while loop that waits until the user enters a key so they can exit
 	HandleUserExitPhase(0)
@@ -181,6 +182,10 @@ func DebugFileMapOutput(FileMap map[string][]string, UserConfig *Config) {
 		UserConfig.RenameFileName,
 		UserConfig.TotalNumberOfEpisodes)
 
+	DebugPrintFileMap(FileMap)
+}
+
+func DebugPrintFileMap(FileMap map[string][]string) {
 	println("Entered Debug Output for FileMap")
 	keys := make([]string, 0, len(FileMap))
 
@@ -228,9 +233,36 @@ func GetUserNumberOfEpisodes() int {
 
 	return NumberofEpisodesInput
 }
-func HanldeFileRenaming(UserConfig *Config) {
+func HanldeFileRenaming(UserConfig *Config, FileMap map[string][]string) {
 	// TODO handle the ranaming
-	return
+
+	// Error handling if the subtitle and videos files are different sizes
+	if len(FileMap[UserConfig.SubtitleUserConfigName]) != len(FileMap[UserConfig.VideoUserConfigName]) {
+		fmt.Printf("\nSubtitles (%d) and Video (%d) files are different sizes. \nMake sure there are equal number of subtitle and video files.\n",
+			len(FileMap[UserConfig.SubtitleUserConfigName]), len(FileMap[UserConfig.VideoUserConfigName]))
+		HandleUserExitPhase(-1)
+	}
+	if len(FileMap[UserConfig.SubtitleUserConfigName]) != UserConfig.TotalNumberOfEpisodes || len(FileMap[UserConfig.VideoUserConfigName]) != UserConfig.TotalNumberOfEpisodes {
+		fmt.Printf("\nTotal number of episodes you entered was %d, but subtitle(%d) or video(%d) files dont match. Try again\n",
+			UserConfig.TotalNumberOfEpisodes, len(FileMap[UserConfig.SubtitleUserConfigName]), len(FileMap[UserConfig.VideoUserConfigName]))
+		HandleUserExitPhase(-1)
+	}
+
+	FileRenameString := UserConfig.RenameFileName + " - "
+
+	for extension, names := range FileMap {
+		for i, name := range names {
+			index := fmt.Sprintf("%02d", i+1) // Better format "01,02,..,09,10,11"
+			FinalRenameString := FileRenameString + index + extension
+			os.Rename(filepath.Join(UserConfig.directory, name), filepath.Join(UserConfig.directory, FinalRenameString))
+		}
+	}
+	println("After file rename debug out")
+	DebugAfterFileRenamePrintNames(UserConfig)
+}
+
+func DebugAfterFileRenamePrintNames(UserConfig *Config) {
+	DebugPrintFileMap(GetUserFiles(UserConfig))
 }
 
 func HandleUserExitPhase(OSExitCode int) {
