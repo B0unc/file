@@ -326,5 +326,112 @@ func TestGetUserFiles(t *testing.T) {
 
 /*
 Test
+
 	func HanldeFileRenaming(UserConfig *Config, FileMap map[string][]string)
 */
+func TestHandleFileRenaming(t *testing.T) {
+	tests := []struct {
+		name                      string
+		OriginalFiles             []string
+		VideoConfigExtension      string
+		SubConfigExtension        string
+		TestRenameFileName        string
+		TestTotalNumberOfEpisodes int
+		want                      map[string][]string
+		wantErr                   bool
+	}{
+		{
+			name:                      "Rename MKV and SRT Files",
+			OriginalFiles:             []string{"a.mkv", "b.mkv", "c.mkv", "a.srt", "b.srt", "c.srt"},
+			VideoConfigExtension:      ".mkv",
+			SubConfigExtension:        ".srt",
+			TestRenameFileName:        "Show",
+			TestTotalNumberOfEpisodes: 3,
+			want: map[string][]string{
+				".mkv": {"Show - 01.mkv", "Show - 02.mkv", "Show - 03.mkv"},
+				".srt": {"Show - 01.srt", "Show - 02.srt", "Show - 03.srt"},
+			},
+		},
+		{
+			name:                      "Rename MKV and ASS Files",
+			OriginalFiles:             []string{"a.mkv", "b.mkv", "c.mkv", "a.ass", "b.ass", "c.ass"},
+			VideoConfigExtension:      ".mkv",
+			SubConfigExtension:        ".ass",
+			TestRenameFileName:        "testing_the_file",
+			TestTotalNumberOfEpisodes: 3,
+			want: map[string][]string{
+				".mkv": {"testing_the_file - 01.mkv", "testing_the_file - 02.mkv", "testing_the_file - 03.mkv"},
+				".ass": {"testing_the_file - 01.ass", "testing_the_file - 02.ass", "testing_the_file - 03.ass"},
+			},
+		},
+		{
+			name:                      "Rename MP4 and ASS Files",
+			OriginalFiles:             []string{"a.mp4", "b.mp4", "c.mp4", "a.ass", "b.ass", "c.ass"},
+			VideoConfigExtension:      ".mp4",
+			SubConfigExtension:        ".ass",
+			TestRenameFileName:        "The Show",
+			TestTotalNumberOfEpisodes: 3,
+			want: map[string][]string{
+				".mp4": {"The Show - 01.mp4", "The Show - 02.mp4", "The Show - 03.mp4"},
+				".ass": {"The Show - 01.ass", "The Show - 02.ass", "The Show - 03.ass"},
+			},
+		},
+		{
+			name:                      "Rename MP4 and SRT Files",
+			OriginalFiles:             []string{"a.mp4", "b.mp4", "c.mp4", "a.srt", "b.srt", "c.srt"},
+			VideoConfigExtension:      ".mp4",
+			SubConfigExtension:        ".srt",
+			TestRenameFileName:        "Hibi whatever_2",
+			TestTotalNumberOfEpisodes: 3,
+			want: map[string][]string{
+				".mp4": {"Hibi whatever_2 - 01.mp4", "Hibi whatever_2 - 02.mp4", "Hibi whatever_2 - 03.mp4"},
+				".srt": {"Hibi whatever_2 - 01.srt", "Hibi whatever_2 - 02.srt", "Hibi whatever_2 - 03.srt"},
+			},
+		},
+		{
+			name:                      "Mismatch Error MP4 and SRT Files",
+			OriginalFiles:             []string{"a.mp4", "c.mp4", "a.srt", "b.srt", "c.srt"},
+			VideoConfigExtension:      ".mp4",
+			SubConfigExtension:        ".srt",
+			TestRenameFileName:        "Hibi whatever_2",
+			TestTotalNumberOfEpisodes: 3,
+			wantErr:                   true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			dir := t.TempDir()
+
+			for _, f := range tt.OriginalFiles {
+				if err := os.WriteFile(filepath.Join(dir, f), nil, 0o644); err != nil {
+					t.Fatal(err)
+				}
+			}
+
+			cfg := &Config{
+				directory:              dir,
+				VideoUserConfigName:    tt.VideoConfigExtension,
+				SubtitleUserConfigName: tt.SubConfigExtension,
+				RenameFileName:         tt.TestRenameFileName,
+				TotalNumberOfEpisodes:  tt.TestTotalNumberOfEpisodes,
+			}
+
+			_, err := HandleFileRenaming(cfg, GetUserFiles(cfg))
+
+			if (err != nil) != tt.wantErr {
+				t.Fatalf("error = %v, wantErr %v", err, tt.wantErr)
+			}
+
+			if tt.wantErr {
+				return
+			}
+
+			got := GetUserFiles(cfg)
+
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("got %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
