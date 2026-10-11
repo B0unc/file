@@ -4,3 +4,5 @@ video_test/
 *.srt
 *.ass
 *.mp4
+.vscode/*
+!.vscode/launch.json
