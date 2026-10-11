@@ -22,6 +22,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 )
 
@@ -161,20 +162,26 @@ func GetDirectory(ArgumentFolderCommandName string) string {
 
 // TODO Make sure that when the user press the enter key it defaults to the 1 option
 func TakeUserInputForVideo() int {
-	VideoUserInput := 0
+	var VideoUserInput int
 	fmt.Print("(1) MKV\n(2) MP4\nEnter a value for which video file you want to rename: ")
-	fmt.Scanln(&VideoUserInput)
 
-	return VideoUserInput
+	VideoUserInput, err := strconv.Atoi(GetUserInput())
+	if err == nil && VideoUserInput > 0 {
+		return VideoUserInput
+	}
+	return -1
 }
 
 // TODO Make sure that when the user press the enter key it defaults to the 1 option
 func TakeUserInputForSubtitle() int {
-	SubtitleUserInput := 0
+	var SubtitleUserInput int
 	fmt.Print("(1) SRT\n(2) ASS\nEnter a value for which subtitle file you want to rename: ")
-	fmt.Scanln(&SubtitleUserInput)
 
-	return SubtitleUserInput
+	SubtitleUserInput, err := strconv.Atoi(GetUserInput())
+	if err == nil && SubtitleUserInput > 0 {
+		return SubtitleUserInput
+	}
+	return -1
 }
 
 func DebugFileMapOutput(FileMap map[string][]string, UserConfig *Config) {
@@ -221,22 +228,37 @@ func GetUserFiles(UserConfig *Config) map[string][]string {
 	return FileMap
 }
 
+func GetUserInput() string {
+	scanner := bufio.NewScanner(os.Stdin)
+
+	scanner.Scan()
+
+	err := scanner.Err()
+
+	if err != nil {
+		log.Fatal()
+	}
+	return scanner.Text()
+}
+
 func GetUserFileRename() string {
-	UserFileRenameInput := ""
 
 	fmt.Println("\nEnter a the name of the show: ")
-	fmt.Scanln(&UserFileRenameInput)
-
-	return UserFileRenameInput
+	return GetUserInput()
 }
 
 func GetUserNumberOfEpisodes() int {
-	NumberofEpisodesInput := 0
+	var NumberofEpisodesInput int
 	fmt.Println("\nEnter the number of episodes: ")
-	fmt.Scanln(&NumberofEpisodesInput)
 
-	return NumberofEpisodesInput
+	NumberofEpisodesInput, err := strconv.Atoi(GetUserInput())
+	if err == nil && NumberofEpisodesInput > 0 {
+		return NumberofEpisodesInput
+	}
+
+	return -1
 }
+
 func HandleFileRenaming(UserConfig *Config, FileMap map[string][]string) (string, error) {
 	// TODO handle the ranaming
 
